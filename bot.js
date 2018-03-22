@@ -143,6 +143,7 @@ if (!process.env.clientId || !process.env.clientSecret) {
   if (process.env.studio_token) {
       controller.on('direct_message,direct_mention,mention', function(bot, message) {
           controller.studio.runTrigger(bot, message.text, message.user, message.channel, message).then(function(convo) {
+            console.log('text', message.text)
               if (!convo) {
                   // no trigger was matched
                   // If you want your bot to respond to every message,
