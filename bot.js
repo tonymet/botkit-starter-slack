@@ -76,6 +76,15 @@ var bot_options = {
 if (process.env.MONGO_URI) {
     var mongoStorage = require('botkit-storage-mongo')({mongoUri: process.env.MONGO_URI});
     bot_options.storage = mongoStorage;
+} else if (process.env.projectId) {
+    let options = {projectId: process.env.projectId}
+    if (process.env.GOOGLE_CREDENTIALS_BASE64){
+      options.credentials =  JSON.parse(Buffer.from(process.env.GOOGLE_CREDENTIALS_BASE64, 'base64'))
+    }
+    let datastoreStorage = require('botkit-storage-datastore')(options)
+    bot_options.storage = datastoreStorage
+    debug("Google CloudStorage Activated")
+    debug(bot_options)
 } else {
     bot_options.json_file_store = __dirname + '/.data/db/'; // store user data in a simple JSON format
 }
