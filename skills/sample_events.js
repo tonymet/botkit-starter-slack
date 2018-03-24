@@ -18,7 +18,7 @@ function saveFile(message, url_private){
                 return githubService.updateGist(private_url.pathname_safe, res)
             }).then(githubResponse => {
                 debug(githubResponse)
-                bot.reply(message, {text: 'I saved this snippet to the gist: ' + githubResponse.data.html_url, replace_original: true})
+                bot.reply(message, {text: 'I saved this snippet to the: ' + githubResponse.data.html_url, replace_original: true})
             }).catch(err => {
                 debug(err)
             })
@@ -59,7 +59,13 @@ module.exports = function(controller) {
             sendPrompt(file)
     })
     controller.on('interactive_message_callback', function(bot, message) {
-        debug(message.actions)
+        debug('interactive message: ' , message)
+        if(message.callback_id){
+            debug('trggering ', 'interactive_message_callback:' + message.callback_id)
+            controller.trigger('interactive_message_callback:' + message.callback_id, [bot,message])
+        }
+    })
+    controller.on('interactive_message_callback:sendPrompt', (bot, message) => {
         if(message.actions[0].name == "save"){
             saveFile(message,  message.actions[0].value)
         }
