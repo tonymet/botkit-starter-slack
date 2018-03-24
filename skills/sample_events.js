@@ -2,27 +2,20 @@ var debug = require('debug')('sample_evens')
 var rp = require('request-promise-native')
 var {URL} = require('url')
 const githubService = require('../services/github.js')
-function saveFile(message, url_private){
-        if( url_private){
-            var private_url = new URL(url_private)
-            private_url.pathname_safe = private_url.pathname.replace(/\//g, '__')
-            debug('url_private', url_private )
-            var req = rp({
-                method: 'GET',
-                uri: url_private,
-                headers: {
-                    Authorization: 'Bearer ' + bot.team_info.token
-                }
-            }).then(res => {
-                debug("res", res)
-                return githubService.updateGist(private_url.pathname_safe, res)
-            }).then(githubResponse => {
-                debug(githubResponse)
-                bot.reply(message, {text: 'I saved this snippet to the: ' + githubResponse.data.html_url, replace_original: true})
-            }).catch(err => {
-                debug(err)
-            })
+function saveFile(url_private){
+    var private_url = new URL(url_private)
+    private_url.pathname_safe = private_url.pathname.replace(/\//g, '__')
+    debug('url_private', url_private )
+    return rp({
+        method: 'GET',
+        uri: url_private,
+        headers: {
+            Authorization: 'Bearer ' + bot.team_info.token
         }
+    }).then(res => {
+        debug("res", res)
+        return githubService.updateGist(private_url.pathname_safe, res)
+    })
 }
 
 function sendPrompt(file){
@@ -55,7 +48,6 @@ module.exports = function(controller) {
 
     controller.on('file_share', function(bot, file) {
             debug(file)
-            //saveFile(file)
             sendPrompt(file)
     })
     controller.on('interactive_message_callback', function(bot, message) {
@@ -66,10 +58,17 @@ module.exports = function(controller) {
         }
     })
     controller.on('interactive_message_callback:sendPrompt', (bot, message) => {
-        if(message.actions[0].name == "save"){
-            saveFile(message,  message.actions[0].value)
-        }
-        else{
+        if(message.actions.length > 0 && message.actions[0].name == "save"){
+            saveFile(message.actions[0].value)
+            .then(githubResponse => {
+                debug(githubResponse)
+                bot.reply(message, {text: 'I saved this snippet to the: ' + githubResponse.data.html_url, replace_original: true})
+            })
+            .catch(err => {
+                debug(err)
+                bot.reply(message, {text: 'I had trouble saving your snippet' + githubResponse.data.html_url, ephemeral: true})
+            })
+        } else {
             bot.reply(message, {text : "No worries, the snippet was not saved to gist", ephemeral: true, replace_original: true})
         }
     })
