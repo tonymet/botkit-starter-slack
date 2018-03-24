@@ -77,7 +77,7 @@ if (process.env.MONGO_URI) {
     var mongoStorage = require('botkit-storage-mongo')({mongoUri: process.env.MONGO_URI});
     bot_options.storage = mongoStorage;
 } else if (process.env.projectId) {
-    let options = {projectId: process.env.projectId}
+    let options = {projectId: process.env.projectId, namespace: process.env.botName}
     if (process.env.GOOGLE_CREDENTIALS_BASE64){
       options.credentials =  JSON.parse(Buffer.from(process.env.GOOGLE_CREDENTIALS_BASE64, 'base64'))
     }
