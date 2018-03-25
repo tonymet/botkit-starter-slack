@@ -2,7 +2,7 @@ var debug = require('debug')('sample_evens')
 var rp = require('request-promise-native')
 var {URL} = require('url')
 const githubService = require('../services/github.js')
-function saveFile(url_private){
+function saveFile(team, url_private){
     var private_url = new URL(url_private)
     private_url.pathname_safe = private_url.pathname.replace(/\//g, '__')
     debug('url_private', url_private )
@@ -14,7 +14,7 @@ function saveFile(url_private){
         }
     }).then(res => {
         debug("res", res)
-        return githubService.updateGist(private_url.pathname_safe, res)
+        return githubService.updateGist(team,private_url.pathname_safe, res)
     })
 }
 
@@ -59,7 +59,7 @@ module.exports = function(controller) {
     })
     controller.on('interactive_message_callback:sendPrompt', (bot, message) => {
         if(message.actions.length > 0 && message.actions[0].name == "save"){
-            saveFile(message.actions[0].value)
+            saveFile(bot.team_info, message.actions[0].value)
             .then(githubResponse => {
                 debug(githubResponse)
                 bot.reply(message, {text: 'I saved this snippet to the: ' + githubResponse.data.html_url, replace_original: true})

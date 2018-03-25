@@ -52,6 +52,7 @@ This bot demonstrates many of the core features of Botkit:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*/
 require('dotenv').config()
+const util = require('util')
 
 
 if (!process.env.clientId || !process.env.clientSecret || !process.env.PORT) {
@@ -68,7 +69,8 @@ var bot_options = {
     // debug: true,
     scopes: ['bot'],
     studio_token: process.env.studio_token,
-    studio_command_uri: process.env.studio_command_uri
+    studio_command_uri: process.env.studio_command_uri,
+    hostname_external: process.env.hostname_external
 };
 
 // Use a mongo database if specified, otherwise store in a JSON file local to the app.
@@ -91,6 +93,8 @@ if (process.env.MONGO_URI) {
 
 // Create the Botkit controller, which controls all instances of the bot.
 var controller = Botkit.slackbot(bot_options);
+controller.saveTeamPromise = util.promisify(controller.saveTeam)
+controller.findTeamByIdPromise = util.promisify(controller.findTeamById)
 
 controller.startTicking();
 

@@ -1,46 +1,36 @@
 const rp = require('request-promise-native')
-const util = require('util')
 var debug = require('debug')('botkit:github:oauth');
+var github = require('../../services/github.js')
 
-const GithubOAuth = {
-    getAuthorizeURL : () => {
-        return "https://www.github.com/login/oauth/authorize?client_id=" + encodeURIComponent("d9469c047df788b75800")
-        + '&scope=' + encodeURIComponent('gist')
-        + '&state=' + encodeURIComponent(JSON.stringify({team: "T8JP4PBJL"}))
-    },
-
-    exchangeCodeForToken: options => {
-        return rp({
-            method: 'POST',
-            uri: 'https://github.com/login/oauth/access_token',
-            headers: {
-                Accept: 'application/json',
-                "User-Agent": "NodeJS / Oauth Client"
-            },
-            transform2xxOnly : true,
-            json: true,
-            body:  {
-                client_id: options.client_id,
-                client_secret: options.client_secret,
-                code: options.code
+function createTeamGist(team){
+    return github.createGist(team)
+        .then(gist => {
+            debug("createGist gist: ", gist)
+            if(! (gist.id && gist.html_url)){
+                return Promise.reject("gist is incomplete. Missing gist.id or gist.html_url")
             }
+            return {id: gist.id, html_url: gist.html_url}
         })
+}
+
+function addGistToTeam( team, gistInfo){
+    if(!team.github){
+        throw new Error("github not initialized for team")
     }
+    team.github.gist = gistInfo
+    debug("saveGistInfo to team team: ", team, "gistinfo:", gistInfo)
+    return team
 }
 
 module.exports = function(webserver, controller) {
-
     var handler = {
         login: function(req, res) {
-            res.redirect(GithubOAuth.getAuthorizeURL());
+            res.redirect(github.getAuthorizeURL());
         },
         oauth: function(req, res) {
             debug(req.query)
-            var bot = controller
-            saveTeam = util.promisify(bot.storage.teams.save)
             // look up a team's memory and configuration and return it, or
             // return an error!
-            findTeamById = util.promisify(bot.storage.teams.get)
             var code = req.query.code;
             var state = JSON.parse(req.query.state);
             debug("code/state", {code, state})
@@ -50,13 +40,12 @@ module.exports = function(webserver, controller) {
                 code: code
             };
             debug(opts)
-
-            // look up team
-            // save token
-            // redirct to success
-            findTeamById(state.team)
+            // get team from storage
+            controller.findTeamByIdPromise(state.team)
             .then(team=>{
-                return GithubOAuth.exchangeCodeForToken(opts)
+                debug('github.ExchangeCodeForToken team: ', team)
+                // get oauth token from github
+                return github.exchangeCodeForToken(opts)
                     .then(tokenObject => {
                         if(tokenObject){
                             team.github = {oauth: tokenObject }
@@ -64,31 +53,30 @@ module.exports = function(webserver, controller) {
                         return team
                     })
             })
-            .then(saveTeam)
+            // save oauth token . good if we break before getting gist
             .then(team => {
-                bot.team_info = team
+                return controller.saveTeamPromise(team).then( () => team )
             })
+            // create gist and add to team object
+            .then(team => {
+                return createTeamGist(team)
+                .then( gistInfo => addGistToTeam(team, gistInfo) )
+            })
+            // save team object again
+            .then(controller.saveTeamPromise)
             .then(() => {
-                res.json({success: true})
-
+                // TODO convo.say("your new gist is ready") via controller event
+                res.redirect('/login_success.html');
             })
-            .catch(debug)
+            .catch(err => {
+                // TODO convo.say('We\'ve had a problem creating your team\'s gist.  Please re-install  ');
+                debug(err)
+                res.statusCode = 500
+                res.json({error: "error"})
+            })
         }
     }
-
-
-    // Create a /login link
-    // This link will send user's off to Slack to authorize the app
-    // See: https://github.com/howdyai/botkit/blob/master/readme-slack.md#custom-auth-flows
-    debug('Configured /login url');
     webserver.get('/github/login', handler.login);
-
-    // Create a /oauth link
-    // This is the link that receives the postback from Slack's oauth system
-    // So in Slack's config, under oauth redirect urls,
-    // your value should be https://<my custom domain or IP>/oauth
-    debug('Configured /oauth url');
     webserver.get('/github/oauth', handler.oauth);
-
     return handler;
 }

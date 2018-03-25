@@ -1,14 +1,33 @@
 const debug = require('debug')('github-service')
 const GitHub  = require('github-api')
-// unauthenticated client 
-function updateGist(filename,content){
-    debug(bot.team_info)
-    if(!bot.team_info.github.oauth.access_token){
+const rp = require('request-promise-native')
+function createGist(team){
+    if(!team.github.oauth.access_token){
         return Promise.reject("No Access token for team")
     }
-    var token = {token: bot.team_info.github.oauth.access_token}
-    const gh = new GitHub(token);
-    let gist = gh.getGist(process.env.github_gist_id)
+    const gh = new GitHub({token: team.github.oauth.access_token});
+    let gist = gh.getGist()
+    var params = {
+        public: false,
+        description: 'gist1',
+        files: {
+            "file1.txt": {
+               content: "Welcome to slack-gist"
+            }
+         }
+    }
+    debug("createGist params:" , params)
+    return gist.create(params)
+        .then( res => res.data )
+}
+
+function updateGist(team, filename,content){
+    debug(team)
+    if(!team.github.oauth.access_token){
+        return Promise.reject("No Access token for team")
+    }
+    const gh = new GitHub({token: team.github.oauth.access_token});
+    let gist = gh.getGist(team.github.gist.id)
     var params = {
         public: false,
         description: 'gist1',
@@ -18,4 +37,38 @@ function updateGist(filename,content){
     debug(params)
     return gist.update(params)
 }
-module.exports = {updateGist}
+
+getLoginUrl = (hostname_external) => {
+    return hostname_external + "/github/login"
+}
+
+getAuthorizeURL = () => {
+    return "https://www.github.com/login/oauth/authorize?client_id=" + encodeURIComponent(process.env.github_clientId)
+    + '&scope=' + encodeURIComponent('gist')
+    + '&state=' + encodeURIComponent(JSON.stringify({team: "T8JP4PBJL"}))
+}
+
+exchangeCodeForToken = options => {
+    return rp({
+        method: 'POST',
+        uri: 'https://github.com/login/oauth/access_token',
+        headers: {
+            Accept: 'application/json',
+            "User-Agent": "NodeJS / Oauth Client"
+        },
+        transform2xxOnly : true,
+        json: true,
+        body:  {
+            client_id: options.client_id,
+            client_secret: options.client_secret,
+            code: options.code
+        }
+    }).then(tokenObject => {
+        debug('tokenObject', tokenObject)
+        if(!tokenObject || tokenObject.error){
+            return Promise.reject("github token error")
+        }
+        return tokenObject
+    })
+}
+module.exports = {updateGist, createGist, exchangeCodeForToken, getAuthorizeURL, getLoginUrl}
