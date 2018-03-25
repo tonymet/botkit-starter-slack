@@ -66,7 +66,7 @@ module.exports = function(controller) {
             })
             .catch(err => {
                 debug(err)
-                bot.reply(message, {text: 'I had trouble saving your snippet' + githubResponse.data.html_url, ephemeral: true})
+                bot.reply(message, {text: 'I had trouble saving your snippet', ephemeral: true})
             })
         } else {
             bot.reply(message, {text : "No worries, the snippet was not saved to gist", ephemeral: true, replace_original: true})
