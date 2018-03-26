@@ -25,7 +25,10 @@ function addGistToTeam( team, gistInfo){
 module.exports = function(webserver, controller) {
     var handler = {
         login: function(req, res) {
-            res.redirect(github.getAuthorizeURL());
+            if(!req.query.team_id){
+                res.status(400).send("Sorry, team_id is not set")
+            }
+            res.redirect(github.getAuthorizeURL({id: req.query.team_id}));
         },
         oauth: function(req, res) {
             debug(req.query)
@@ -71,8 +74,7 @@ module.exports = function(webserver, controller) {
             .catch(err => {
                 // TODO convo.say('We\'ve had a problem creating your team\'s gist.  Please re-install  ');
                 debug(err)
-                res.statusCode = 500
-                res.json({error: "error"})
+                res.status(500).json({error: "error"})
             })
         }
     }

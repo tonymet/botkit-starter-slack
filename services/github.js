@@ -38,14 +38,17 @@ function updateGist(team, filename,content){
     return gist.update(params)
 }
 
-getLoginUrl = (hostname_external) => {
-    return hostname_external + "/github/login"
+getLoginUrl = (hostname_external, team_id) => {
+    return hostname_external + "/github/login?team_id=" + team_id
 }
 
-getAuthorizeURL = () => {
+getAuthorizeURL = (team) => {
+    if(!team.id){
+        throw new Error("team.id is undefined")
+    }
     return "https://www.github.com/login/oauth/authorize?client_id=" + encodeURIComponent(process.env.github_clientId)
     + '&scope=' + encodeURIComponent('gist')
-    + '&state=' + encodeURIComponent(JSON.stringify({team: "T8JP4PBJL"}))
+    + '&state=' + encodeURIComponent(JSON.stringify({team: team.id}))
 }
 
 exchangeCodeForToken = options => {

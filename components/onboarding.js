@@ -27,7 +27,7 @@ module.exports = function(controller) {
                 }
                 convo.say('I am a bot that has just joined your team');
                 convo.say('You must now /invite me to a channel so that I can be of use!');
-                convo.say('Visit this url to login ' + github.getLoginUrl(controller.config.hostname_external));
+                convo.say('Visit this url to login ' + github.getLoginUrl(controller.config.hostname_external, bot.team_info.id));
             });
         }
     });
