@@ -38,11 +38,11 @@ function updateGist(team, filename,content){
     return gist.update(params)
 }
 
-getLoginUrl = (hostname_external, team_id) => {
+function getLoginUrl(hostname_external, team_id){
     return hostname_external + "/github/login?team_id=" + team_id
 }
 
-getAuthorizeURL = (team) => {
+function getAuthorizeURL(team) {
     if(!team.id){
         throw new Error("team.id is undefined")
     }
@@ -51,7 +51,7 @@ getAuthorizeURL = (team) => {
     + '&state=' + encodeURIComponent(JSON.stringify({team: team.id}))
 }
 
-exchangeCodeForToken = options => {
+function exchangeCodeForToken(options) {
     return rp({
         method: 'POST',
         uri: 'https://github.com/login/oauth/access_token',

@@ -67,10 +67,7 @@ module.exports = function(webserver, controller) {
             })
             // save team object again
             .then(controller.saveTeamPromise)
-            .then(() => {
-                // TODO convo.say("your new gist is ready") via controller event
-                res.redirect('/login_success.html');
-            })
+            .then( res.redirect('/login_success.html') )
             .catch(err => {
                 // TODO convo.say('We\'ve had a problem creating your team\'s gist.  Please re-install  ');
                 debug(err)
