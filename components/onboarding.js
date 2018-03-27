@@ -1,8 +1,11 @@
 var debug = require('debug')('botkit:onboarding');
+var github = require('../services/github.js')
+var util = require('util')
+
 
 module.exports = function(controller) {
 
-    controller.on('onboard', function(bot) {
+    controller.on('onboard', function(bot,team) {
 
         debug('Starting an onboarding experience!');
 
@@ -18,12 +21,13 @@ module.exports = function(controller) {
             });
         } else {
             bot.startPrivateConversation({user: bot.config.createdBy},function(err,convo) {
-              if (err) {
-                console.log(err);
-              } else {
+                if (err) {
+                    console.log(err);
+                    return
+                }
                 convo.say('I am a bot that has just joined your team');
                 convo.say('You must now /invite me to a channel so that I can be of use!');
-              }
+                convo.say('Visit this url to login ' + github.getLoginUrl(controller.config.hostname_external, bot.team_info.id));
             });
         }
     });
