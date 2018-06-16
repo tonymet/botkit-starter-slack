@@ -1,7 +1,13 @@
-var debug = require('debug')('sample_evens')
+var debug = require('debug')('sample_events')
 var rp = require('request-promise-native')
 var {URL} = require('url')
 const githubService = require('../services/github.js')
+const validMimeTypes = ['text/plain']
+
+function isValidFileType(mimeType){
+    return validMimeTypes.includes(mimeType)
+}
+
 function saveFile(team, url_private){
     var private_url = new URL(url_private)
     private_url.pathname_safe = private_url.pathname.replace(/\//g, '__')
@@ -47,7 +53,11 @@ function sendPrompt(file){
 module.exports = function(controller) {
 
     controller.on('file_share', function(bot, file) {
-            debug(file)
+            debug("file_share file: ", file)
+            if(!isValidFileType(file.event.file.mimetype)){
+                bot.reply(file,  {text: "Not a valid type: " + file.event.file.mimetype, ephemeral: true, replace_original: true})
+                return
+            }
             sendPrompt(file)
     })
     controller.on('interactive_message_callback', function(bot, message) {
@@ -58,18 +68,38 @@ module.exports = function(controller) {
         }
     })
     controller.on('interactive_message_callback:sendPrompt', (bot, message) => {
-        if(message.actions.length > 0 && message.actions[0].name == "save"){
+        if(message.actions.length < 1){
+            debug("No actions")
+            return
+        }
+        if( message.actions[0].name == "save"){
             saveFile(bot.team_info, message.actions[0].value)
             .then(githubResponse => {
                 debug(githubResponse)
-                bot.reply(message, {text: 'I saved this snippet to the: ' + githubResponse.data.html_url, replace_original: true})
+                bot.replyInteractive(message, {text: "Saved."})
+                bot.reply(message, {
+                    text: 'I saved this snippet to the Team Gist',
+                    ephemeral: false,
+                    attachments: [
+                        {
+                            "fallback": "Saved to Team Gist: " +  githubResponse.data.html_url,
+                            "actions": [
+                                {
+                                    "type": "button",
+                                    "text": `Open Team Gist ${ String.fromCodePoint(0x1F4DD)}`,
+                                    "url": githubResponse.data.html_url
+                                }
+                            ]
+                        }
+                    ]
+                })
             })
             .catch(err => {
                 debug(err)
-                bot.reply(message, {text: 'I had trouble saving your snippet', ephemeral: true})
+                bot.replyInteractive(message, {text: 'I had trouble saving your snippet', ephemeral: true})
             })
         } else {
-            bot.reply(message, {text : "No worries, the snippet was not saved to gist", ephemeral: true, replace_original: true})
+            bot.replyInteractive(message, {text : "No worries, the snippet was not saved to gist", ephemeral: true, replace_original: true})
         }
     })
 }

@@ -13,6 +13,7 @@ function createTeamGist(team){
         })
 }
 
+
 function addGistToTeam( team, gistInfo){
     if(!team.github){
         throw new Error("github not initialized for team")

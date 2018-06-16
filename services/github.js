@@ -28,6 +28,7 @@ function updateGist(team, filename,content){
     }
     const gh = new GitHub({token: team.github.oauth.access_token});
     let gist = gh.getGist(team.github.gist.id)
+    debug("updateGist gist", gist)
     var params = {
         public: false,
         description: 'gist1',

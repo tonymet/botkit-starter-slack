@@ -4,13 +4,13 @@
   "description": "A starter kit for building a custom Slack bot with Botkit Studio",
   "main": "bot.js",
   "scripts": {
-    "start": "node bot.js"
+    "start": "node bot.js",
+    "debug": "nodemon -- --nolazy --inspect=0.0.0.0 bot.js"
   },
   "dependencies": {
     "body-parser": "^1.15.2",
-    "botkit": "^0.6.12",
+    "botkit": "^0.6.14",
     "botkit-storage-datastore": "git://github.com/tonymet/botkit-storage-datastore.git#feature/smaller-dependencies",
-    "botkit-studio-metrics": "^0.0.2",
     "cookie-parser": "^1.4.3",
     "debug": "^2.3.3",
     "dotenv": "^5.0.1",
