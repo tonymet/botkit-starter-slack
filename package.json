@@ -10,8 +10,8 @@
   },
   "dependencies": {
     "body-parser": "^1.15.2",
-    "botkit": "^0.6.14",
-    "botkit-storage-datastore": "git://github.com/tonymet/botkit-storage-datastore.git#feature/smaller-dependencies",
+    "botkit": "github:tonymet/botkit#feature/disable-twilio",
+    "botkit-storage-datastore": "github:tonymet/botkit-storage-datastore#feature/smaller-dependencies",
     "cookie-parser": "^1.4.3",
     "debug": "^2.3.3",
     "dotenv": "^5.0.1",

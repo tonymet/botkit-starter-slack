@@ -17,7 +17,8 @@ var bot_options = {
     scopes: ['bot'],
     studio_token: process.env.studio_token,
     studio_command_uri: process.env.studio_command_uri,
-    hostname_external: process.env.hostname_external
+    hostname_external: process.env.hostname_external,
+    stats_optout: true
 };
 
 if (process.env.projectId) {

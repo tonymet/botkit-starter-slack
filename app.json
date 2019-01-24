@@ -5,6 +5,7 @@
   "keywords": ["node", "bots", "slack","botkit"],
   "website": "https://studio.botkit.ai/",
   "success_url":"/",
+  "stats_optout" : true,
   "addons":[
     {
       "plan": "mongolab",
