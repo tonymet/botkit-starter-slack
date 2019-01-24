@@ -7,7 +7,23 @@ if (!process.env.clientId || !process.env.clientSecret || !process.env.PORT) {
   // process.exit(1);
 }
 
-var Botkit = require('botkit');
+
+var Botkit
+global.botkitOptions = {
+  facebookbot:   {},
+  twilioipmbot : {},
+  twiliosmsbot:  {},
+  botframeworkbot: {},
+  sparkbot: {},
+  consolebot: {},
+  jabberbot: {},
+  socketbot: {},
+  anywhere:{},
+  googlehangoutsbot:{},
+  teamsbot: {}
+}
+Botkit= require('botkit')
+
 var debug = require('debug')('botkit:main');
 
 var bot_options = {
