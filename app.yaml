@@ -1,0 +1,4 @@
+runtime: nodejs10
+entrypoint: node bot.js
+service: gistr
+instance_class: F2

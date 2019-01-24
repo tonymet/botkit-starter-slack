@@ -5,3 +5,4 @@ components/routes/_*
 .sass-cache/*
 .data
 credentials.json
+app-*.yaml

@@ -5,7 +5,8 @@
   "main": "bot.js",
   "scripts": {
     "start": "node bot.js",
-    "debug": "nodemon -- --nolazy --inspect=0.0.0.0 bot.js"
+    "debug": "nodemon -- --nolazy --inspect=0.0.0.0 bot.js",
+    "deploy": "cat app.yaml app-env.yaml > app-complete.yaml && gcloud app deploy app-complete.yaml"
   },
   "dependencies": {
     "body-parser": "^1.15.2",
