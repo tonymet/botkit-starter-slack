@@ -37,7 +37,7 @@ function sendPrompt(file){
                 {
                     "text": "Save?",
                     "name": "save",
-                    "value": file.file.url_private,
+                    "value": file.files[0].url_private,
                     "type": "button"
                 },
                 {
@@ -54,7 +54,7 @@ module.exports = function(controller) {
 
     controller.on('file_share', function(bot, file) {
             debug("file_share file: ", file)
-            if(!isValidFileType(file.event.file.mimetype)){
+            if(!isValidFileType(file.event.files[0].mimetype)){
                 bot.reply(file,  {text: "Not a valid type: " + file.event.file.mimetype, ephemeral: true, replace_original: true})
                 return
             }
