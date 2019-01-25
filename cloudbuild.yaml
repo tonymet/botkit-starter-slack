@@ -2,6 +2,7 @@ steps:
 - name: "gcr.io/cloud-builders/gsutil"
   args: ['cp', 'gs://fifth-coral-473.appspot.com/config-files/app-env.yaml', 'app-env.yaml']
 - name: "gcr.io/fifth-coral-473/gistr-slack-prebuild:latest"
+  args: ["cat app.yaml app-env.yaml > app-complete.yaml"]
 - name: "gcr.io/cloud-builders/gcloud"
   args: ["app", "deploy", "app-complete.yaml"]
 - name: "gcr.io/cloud-builders/gcloud"
