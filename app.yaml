@@ -1,4 +1,4 @@
 runtime: nodejs10
 entrypoint: node bot.js
-service: gistr
+service: "gistr"
 instance_class: F1

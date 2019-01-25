@@ -1,0 +1,4 @@
+dispatch:
+    - url: "gistr.appbots.net/*"
+      service: gistr
+

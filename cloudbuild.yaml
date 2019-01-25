@@ -4,4 +4,6 @@ steps:
 - name: "gcr.io/fifth-coral-473/gistr-slack-prebuild:latest"
 - name: "gcr.io/cloud-builders/gcloud"
   args: ["app", "deploy", "app-complete.yaml"]
+- name: "gcr.io/cloud-builders/gcloud"
+  args: ["app", "deploy", "dispatch.yaml"]
 timeout: "1600s"
