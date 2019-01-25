@@ -1,6 +1,5 @@
 .*
 app-env.yaml
-app.yaml
 .gcloudignore
 .git
 .gitignore
